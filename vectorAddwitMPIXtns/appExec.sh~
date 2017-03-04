@@ -1,0 +1,59 @@
+#!/bin/bash
+
+
+host0=148.247.102.195
+#host1=148.247.102.191
+#host2=148.247.102.192
+#host3=148.247.102.190
+
+
+declare -a dels=($host1)
+for j in "${dels[@]}"
+do
+rsh uriel@$j rm /home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/AdddataFile.dat
+done
+
+declare -a arr=($host1)
+for i in "${arr[@]}"
+do
+
+#copy the executable
+rsync -r /home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/Debug/vectorAddwitMPIXtns uriel@$i:/home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/Debug 
+
+#rsync /home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/Debug/hostfile.cfg uriel@$i:/home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/Debug/hostfile.cfg
+
+#rsync /home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/Debug/ranksfile.cfg uriel@$i:/home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/Debug/ranksfile.cfg
+
+#copy the kernel (procedure)
+rsync /home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/src/vecAdd.cl uriel@$i:/home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/src/
+
+#copy the local scheduling file
+rsync /home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/taskSched.cfg uriel@$i:/home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/
+
+done
+
+touch results2.txt
+count=1
+#exec
+#declare -a szs=(4194304 16777216 134217728 268435456)
+#declare -a szs=(4194304 16777216 33554432 134217728)
+declare -a szs=(1024)
+declare numhosts=(1)
+declare devType=(0)
+for j in "${szs[@]}"
+do
+for i in "${numhosts[@]}"
+do
+echo -n "$i " >> results2.txt 
+for k in "${devType[@]}"
+do
+time /home/uriel/mpiELFs/bin/mpirun -np $i  --hostfile /home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/Debug/hostfile.cfg --rankfile /home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/Debug/ranksfile.cfg  /home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/Debug/vectorAddwitMPIXtns $j $k
+done
+sed -i -e '$a\' results2.txt #writes a new line character.
+done
+sed -i -e "$count s/^/$i /" results2.txt
+let count+=1
+done
+
+
+#time /home/uriel/mpiELFs/bin/mpirun -np 1 /home/uriel/Dev/mpiApps/extnsApps/vectorAddwitMPIXtns/Debug/vectorAddwitMPIXtns

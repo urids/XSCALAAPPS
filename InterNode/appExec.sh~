@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/home/uriel/mpiELFs/bin/mpirun -np 2 --hostfile /home/uriel/Dev/mpiApps/extnsApps/InterNode/local_hostfile.cfg --rankfile /home/uriel/Dev/mpiApps/extnsApps/InterNode/local_ranksfile.cfg /home/uriel/Dev/mpiApps/extnsApps/InterNode/Debug/InterNode

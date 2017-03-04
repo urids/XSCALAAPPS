@@ -1,0 +1,68 @@
+#!/bin/bash
+host0=148.247.102.190
+#host1=148.247.102.191
+#host2=148.247.102.192
+#host3=148.247.102.193
+#host4=148.247.102.140
+
+
+#source delMatx.sh
+
+declare -a arr=($host0)
+for i in "${arr[@]}"
+do
+
+#rsh uriel@$i mkdir /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns 
+#rsh uriel@$i mkdir /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug
+#rsh uriel@$i mkdir /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/src
+
+#copy the executable
+rsync -r /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/MtxMultWithMPIXtns uriel@$i:/home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/
+
+#copy the kernel
+rsync /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/src/matrixMult.cl uriel@$i:/home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/src/
+
+#copy scheduling configuration file
+rsync /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/taskSched.cfg uriel@$i:/home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/taskSched.cfg
+
+#copy the Data (ignore if data is self generated (is FASTER!!))
+#rsync /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/dataFile.dat uriel@$i:/home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/dataFile.dat
+
+done
+
+
+touch resultsMtxMult.txt
+count=1
+#exec
+declare -a szs=(1024)
+declare numhosts=(2)
+declare devType=(0)
+for j in "${szs[@]}"
+do
+for i in "${numhosts[@]}"
+do
+echo -n "$i " >> resultsMtxMult.txt #writes the number of hosts
+for k in "${devType[@]}"
+do
+time /home/uriel/mpiELFs/bin/mpirun -np $i  --hostfile /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/hostfile.cfg --rankfile /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/ranksfile.cfg  /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/MtxMultWithMPIXtns $j $k
+done
+sed -i -e '$a\' resultsMtxMult.txt #writes a new line character.
+done
+let count+=1
+done
+
+#exec
+#time /home/uriel/mpiELFs/bin/mpirun -np 1  --hostfile /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/hostfile.cfg --rankfile /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/ranksfile.cfg  /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/MtxMultWithMPIXtns 4096
+
+#declare -a szs=(256 512 1024 2048 4096 8192)
+#for j in "${szs[@]}"
+#do
+#time /home/uriel/mpiELFs/bin/mpirun -np 4  --hostfile /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/hostfile.cfg --rankfile /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/ranksfile.cfg  /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/MtxMultWithMPIXtns $j
+#done
+
+#time /home/uriel/mpiELFs/bin/mpirun -np 4  --hostfile /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/hostfile.cfg --rankfile /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/ranksfile.cfg  /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/MtxMultWithMPIXtns 8192
+ 
+
+#time /home/uriel/mpiELFs/bin/mpirun -np 1 /home/uriel/Dev/mpiApps/extnsApps/MtxMultWithMPIXtns/Debug/MtxMultWithMPIXtns 4096
+
+

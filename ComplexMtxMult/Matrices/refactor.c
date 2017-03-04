@@ -1,0 +1,79 @@
+#include<stdlib.h>
+#include<stdio.h>
+#include <string.h>
+#define SIZE 5000
+
+int _main(int argc, char** argv){
+
+int i,j;
+float *sai5;
+double * dai5;
+FILE *fpr;
+
+if(argc!=3){
+printf("usage ./oref \"file_name\" 0=single 1=double");
+}
+int dtype=atoi(argv[2]);
+
+FILE *fp = fopen (argv[1],"r");
+if(fp==NULL){
+    printf("file not found");
+    return -1;
+}
+else{	
+
+switch(dtype){
+case 0:
+
+    sai5=(float*) malloc(SIZE*SIZE*sizeof(float));
+
+ for(i = 0; i < SIZE; i++)
+  {
+      for(j = 0; j < SIZE; j++) 
+      {      
+	if (!fscanf(fp, "%f", &sai5[SIZE*i+j])) 
+           break; 
+      }
+
+  }
+
+
+
+fpr=fopen("Sbi5000.dat","w+");
+fwrite(sai5,sizeof(float),SIZE*SIZE,fpr);
+break;
+
+
+case 1:
+
+    dai5=(double*) malloc(SIZE*SIZE*sizeof(double));
+
+ for(i = 0; i < SIZE; i++)
+  {
+      for(j = 0; j < SIZE; j++) 
+      {
+       
+	if (!fscanf(fp, "%lf", &dai5[SIZE*i+j])) 
+           break; 
+      }
+
+  }
+
+
+
+fpr=fopen("Dbi5000.dat","w+");
+fwrite(dai5,sizeof(double),SIZE*SIZE,fpr);
+break;
+
+default:
+printf("no dtype");
+
+
+}
+
+
+}
+return 0;
+}
+
+
